@@ -5,6 +5,8 @@ VisualStudioVersion = 17.0.32112.339
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BinarySerializer", "BinarySerializer\BinarySerializer.csproj", "{3679EB51-83C6-4E78-968E-8DDCE44452C1}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sandbox", "Sandbox\Sandbox.csproj", "{0391611A-B027-4BD0-99D9-F08FB03C9028}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{3679EB51-83C6-4E78-968E-8DDCE44452C1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3679EB51-83C6-4E78-968E-8DDCE44452C1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3679EB51-83C6-4E78-968E-8DDCE44452C1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0391611A-B027-4BD0-99D9-F08FB03C9028}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0391611A-B027-4BD0-99D9-F08FB03C9028}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0391611A-B027-4BD0-99D9-F08FB03C9028}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0391611A-B027-4BD0-99D9-F08FB03C9028}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

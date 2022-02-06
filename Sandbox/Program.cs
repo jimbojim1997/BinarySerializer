@@ -4,9 +4,14 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BinarySerializer
+using BinarySerializer;
+
+namespace Sandbox
 {
-    public class Class1
+    internal class Program
     {
+        static void Main(string[] args)
+        {
+        }
     }
 }
