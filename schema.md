@@ -4,22 +4,22 @@
 
 All primitives are stored in [Little Endian byte order](https://en.wikipedia.org/wiki/Endianness).
 
-`LSB`: Least Significant Byte. `MSB`: Most Significant Byte. `-`: Intermediate bytes.
+`LO`: Low Order Byte. `HI`: High Order Byte. `-`: Intermediate bytes.
 
 | Type | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 |
 |------|---|---|---|---|---|---|---|---|
-| `byte` | `LSB` | | | | | | | |
-| `sbyte` | `LSB` | | | | | | | |
-| `boolean` [^1] | `LSB` | | | | | | | |
-| `short`/`int16` | `LSB` | `MSB` | | | | | | |
-| `ushort`/`uint16` | `LSB` | `MSB` | | | | | | |
-| `char` [^2] | `LSB` | `MSB` | | | | | | |
-| `int`/`int32` | `LSB` | - | - | `MSB` | | | | |
-| `uint`/`uint32` | `LSB` | - | - | `MSB` | | | | |
-| `float`/`single` | `LSB` | - | - | `MSB` | | | | |
-| `long`/`int64` | `LSB` | - | - | - | - | - | - | `MSB` |
-| `ulong`/`uint64` | `LSB` | - | - | - | - | - | - | `MSB` |
-| `double` | `LSB` | - | - | - | - | - | - | `MSB` |
+| `byte` | `LO` | | | | | | | |
+| `sbyte` | `LO` | | | | | | | |
+| `boolean` [^1] | `LO` | | | | | | | |
+| `short`/`int16` | `LO` | `HI` | | | | | | |
+| `ushort`/`uint16` | `LO` | `HI` | | | | | | |
+| `char` [^2] | `LO` | `HI` | | | | | | |
+| `int`/`int32` | `LO` | - | - | `HI` | | | | |
+| `uint`/`uint32` | `LO` | - | - | `HI` | | | | |
+| `float`/`single` | `LO` | - | - | `HI` | | | | |
+| `long`/`int64` | `LO` | - | - | - | - | - | - | `HI` |
+| `ulong`/`uint64` | `LO` | - | - | - | - | - | - | `HI` |
+| `double` | `LO` | - | - | - | - | - | - | `HI` |
 
 ## Non-primitives
 
