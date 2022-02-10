@@ -152,6 +152,16 @@ namespace Tests.SerializationHelpersTests
             AssertRoundTrip(value, SerializationHelpers.SerializeDouble, SerializationHelpers.DeserializeDouble);
         }
 
+        [DataTestMethod]
+        [DataRow(0)]
+        [DataRow(1)]
+        [DataRow(65534)]
+        [DataRow(65535)]
+        public void ObjectIdRoundTrip(int value)
+        {
+            AssertRoundTrip((ushort)value, SerializationHelpers.SerializeObjectId, SerializationHelpers.DeserializeObjectId);
+        }
+
         private void AssertRoundTrip<T>(T expected, Action<T, Stream> serialize, Func<Stream, T> deserialize)
         {
             using(MemoryStream ms = new MemoryStream())
