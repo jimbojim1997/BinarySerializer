@@ -138,7 +138,7 @@ namespace Tests.SerializationHelpersTests
         }
 
         [DataTestMethod]
-        [DataRow(-9223372036854775808)]
+        [DataRow(-9223372036854775808D)]
         [DataRow(-9223372036854775807D)]
         [DataRow(-12.345D)]
         [DataRow(-1D)]
@@ -150,6 +150,21 @@ namespace Tests.SerializationHelpersTests
         public void DoubleRoundTrip(double value)
         {
             AssertRoundTrip(value, SerializationHelpers.SerializeDouble, SerializationHelpers.DeserializeDouble);
+        }
+
+        [DataTestMethod]
+        [DataRow(-9223372036854775808D)]
+        [DataRow(-9223372036854775807D)]
+        [DataRow(-12.345D)]
+        [DataRow(-1D)]
+        [DataRow(0D)]
+        [DataRow(1D)]
+        [DataRow(12.345D)]
+        [DataRow(9223372036854775806D)]
+        [DataRow(9223372036854775807D)]
+        public void DecimalRoundTrip(double value)
+        {
+            AssertRoundTrip((decimal)value, SerializationHelpers.SerializeDecimal, SerializationHelpers.DeserializeDecimal);
         }
 
         [DataTestMethod]

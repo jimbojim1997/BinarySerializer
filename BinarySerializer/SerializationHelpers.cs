@@ -166,6 +166,27 @@ namespace BinarySerializer
             }
         }
 
+        public static void SerializeDecimal(decimal value, Stream stream)
+        {
+            int[] bits = decimal.GetBits(value);
+            SerializeInt(bits[0], stream);
+            SerializeInt(bits[1], stream);
+            SerializeInt(bits[2], stream);
+            SerializeInt(bits[3], stream);
+        }
+
+        public static decimal DeserializeDecimal(Stream stream)
+        {
+            int[] bits = new int[]
+            {
+                DeserializeInt(stream),
+                DeserializeInt(stream),
+                DeserializeInt(stream),
+                DeserializeInt(stream)
+            };
+            return new decimal(bits);
+        }
+
         internal static void SerializeObjectId(uint objectId, Stream stream)
         {
             SerializeUInt(objectId, stream);
