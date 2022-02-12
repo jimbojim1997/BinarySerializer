@@ -2,7 +2,6 @@
 using System.IO;
 using System.Reflection;
 using System.Runtime.Serialization;
-using System.Text;
 
 namespace BinarySerializer
 {
@@ -50,11 +49,7 @@ namespace BinarySerializer
                 {
                     objectId = serializedObjects.Add((object)obj);
                     SerializationHelpers.SerializeObjectId(objectId, stream);
-
-                    byte[] bytes = Encoding.UTF8.GetBytes(str);
-                    SerializationHelpers.SerializeUInt((uint)bytes.Length, stream);
-
-                    stream.Write(bytes, 0, bytes.Length);
+                    SerializationHelpers.SerializeString(str, stream);
                 }
             }
             else if (obj is decimal de)
@@ -155,10 +150,7 @@ namespace BinarySerializer
                 }
                 else
                 {
-                    uint length = SerializationHelpers.DeserializeUInt(stream);
-                    byte[] bytes = new byte[(int)length];
-                    stream.Read(bytes, 0, bytes.Length);
-                    obj = Encoding.UTF8.GetString(bytes);
+                    obj = SerializationHelpers.DeserializeString(stream);
                     deserializedObjects.Add(objectId, obj);
                     return (T)obj;
                 }

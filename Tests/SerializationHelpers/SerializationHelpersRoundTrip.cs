@@ -168,6 +168,15 @@ namespace Tests.SerializationHelpersTests
         }
 
         [DataTestMethod]
+        [DataRow((string)null)]
+        [DataRow("")]
+        [DataRow("Test Text")]
+        public void StringRoundTrip(string value)
+        {
+            AssertRoundTrip(value, SerializationHelpers.SerializeString, SerializationHelpers.DeserializeString);
+        }
+
+        [DataTestMethod]
         [DataRow(0)]
         [DataRow(1)]
         [DataRow(65534)]

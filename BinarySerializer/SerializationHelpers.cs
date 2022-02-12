@@ -1,4 +1,5 @@
 ﻿using System.IO;
+using System.Text;
 
 namespace BinarySerializer
 {
@@ -166,7 +167,7 @@ namespace BinarySerializer
             }
         }
 
-        public static void SerializeDecimal(decimal value, Stream stream)
+        internal static void SerializeDecimal(decimal value, Stream stream)
         {
             int[] bits = decimal.GetBits(value);
             SerializeInt(bits[0], stream);
@@ -175,7 +176,7 @@ namespace BinarySerializer
             SerializeInt(bits[3], stream);
         }
 
-        public static decimal DeserializeDecimal(Stream stream)
+        internal static decimal DeserializeDecimal(Stream stream)
         {
             int[] bits = new int[]
             {
@@ -185,6 +186,21 @@ namespace BinarySerializer
                 DeserializeInt(stream)
             };
             return new decimal(bits);
+        }
+
+        internal static void SerializeString(string value, Stream stream)
+        {
+            byte[] bytes = Encoding.UTF8.GetBytes(value);
+            SerializeUInt((uint)bytes.Length, stream);
+            stream.Write(bytes, 0, bytes.Length);
+        }
+
+        internal static string DeserializeString(Stream stream)
+        {
+            uint length = DeserializeUInt(stream);
+            byte[] bytes = new byte[(int)length];
+            stream.Read(bytes, 0, bytes.Length);
+            return Encoding.UTF8.GetString(bytes);
         }
 
         internal static void SerializeObjectId(uint objectId, Stream stream)
