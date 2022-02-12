@@ -49,6 +49,7 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ReflectionBinarySerializer\ReflectionBinarySerializerRountTrip.cs" />
     <Compile Include="SerializationHelpers\SerializationHelpersRoundTrip.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
