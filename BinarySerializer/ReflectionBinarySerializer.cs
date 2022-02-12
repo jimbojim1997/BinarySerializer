@@ -37,7 +37,6 @@ namespace BinarySerializer
                 else if (obj is long l) SerializationHelpers.SerializeLong(l, stream);
                 else if (obj is ulong ul) SerializationHelpers.SerializeULong(ul, stream);
                 else if (obj is double d) SerializationHelpers.SerializeDouble(d, stream);
-                else if (obj is decimal de) SerializationHelpers.SerializeDecimal(de, stream);
                 else throw new Exception($"Primitive type \"{type.FullName}\" not supported.");
             }
             else if (obj is string str)
@@ -57,6 +56,10 @@ namespace BinarySerializer
 
                     stream.Write(bytes, 0, bytes.Length);
                 }
+            }
+            else if (obj is decimal de)
+            {
+                SerializationHelpers.SerializeDecimal(de, stream);
             }
             else if (type.IsArray)
             {
@@ -140,7 +143,6 @@ namespace BinarySerializer
                 else if (type.Equals(typeof(long))) obj = SerializationHelpers.DeserializeLong(stream);
                 else if (type.Equals(typeof(ulong))) obj = SerializationHelpers.DeserializeULong(stream);
                 else if (type.Equals(typeof(double))) obj = SerializationHelpers.DeserializeDouble(stream);
-                else if (type.Equals(typeof(decimal))) obj = SerializationHelpers.DeserializeDecimal(stream);
                 else throw new Exception($"Primitive type \"{type.FullName}\" not supported.");
                 return (T)obj;
             }
@@ -160,6 +162,10 @@ namespace BinarySerializer
                     deserializedObjects.Add(objectId, obj);
                     return (T)obj;
                 }
+            }
+            else if (type.Equals(typeof(decimal)))
+            {
+                return (T)(object)SerializationHelpers.DeserializeDecimal(stream);
             }
             else if (type.IsArray)
             {
