@@ -6,7 +6,7 @@ using System.IO;
 using BinarySerializer.Tests.Extensions;
 using BinarySerializer.Tests.TestStructures;
 
-namespace BinarySerializer.Tests.ReflectionBinarySerializerTests
+namespace BinarySerializer.Tests.IBinarySerializerTests.ReflectionBinarySerializerTests
 {
     [TestClass]
     public class ReflectionBinarySerializer

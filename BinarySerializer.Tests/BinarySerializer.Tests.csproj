@@ -50,8 +50,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Extensions\AssertExtensions.cs" />
-    <Compile Include="ReflectionBinarySerializerTests\ReflectionBinarySerializer.cs" />
-    <Compile Include="ReflectionBinarySerializerTests\ReflectionBinarySerializerRoundTrip.cs" />
+    <Compile Include="IBinarySerializerTests\ReflectionBinarySerializerTests\ReflectionBinarySerializer.cs" />
+    <Compile Include="IBinarySerializerTests\ReflectionBinarySerializerTests\ReflectionBinarySerializerRoundTrip.cs" />
     <Compile Include="SerializationHelpersTests\SerializationEndOfStreamException.cs" />
     <Compile Include="SerializationHelpersTests\SerializationHelpersRoundTrip.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
