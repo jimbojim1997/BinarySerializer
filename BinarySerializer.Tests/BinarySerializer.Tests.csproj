@@ -52,6 +52,8 @@
     <Compile Include="Extensions\AssertExtensions.cs" />
     <Compile Include="IBinarySerializerTests\BinarySerializerRountTripTestsBase.cs" />
     <Compile Include="IBinarySerializerTests\BinarySerializerTestsBase.cs" />
+    <Compile Include="IBinarySerializerTests\CompiledBinarySerializerTests\CompiledBinarySerializer.cs" />
+    <Compile Include="IBinarySerializerTests\CompiledBinarySerializerTests\CompiledBinarySerializerRoundTrip.cs" />
     <Compile Include="IBinarySerializerTests\ReflectionBinarySerializerTests\ReflectionBinarySerializer.cs" />
     <Compile Include="IBinarySerializerTests\ReflectionBinarySerializerTests\ReflectionBinarySerializerRoundTrip.cs" />
     <Compile Include="SerializationHelpersTests\SerializationEndOfStreamException.cs" />
