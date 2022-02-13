@@ -49,9 +49,17 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ReflectionBinarySerializer\ReflectionBinarySerializerRountTrip.cs" />
-    <Compile Include="SerializationHelpers\SerializationHelpersRoundTrip.cs" />
+    <Compile Include="Extensions\AssertExtensions.cs" />
+    <Compile Include="ReflectionBinarySerializerTests\ReflectionBinarySerializer.cs" />
+    <Compile Include="ReflectionBinarySerializerTests\ReflectionBinarySerializerRoundTrip.cs" />
+    <Compile Include="SerializationHelpersTests\SerializationEndOfStreamException.cs" />
+    <Compile Include="SerializationHelpersTests\SerializationHelpersRoundTrip.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="TestStructures\ExampleClass.cs" />
+    <Compile Include="TestStructures\ExampleStruct.cs" />
+    <Compile Include="TestStructures\StubStreamNonReadWrite.cs" />
+    <Compile Include="TestStructures\UnsupportedClass.cs" />
+    <Compile Include="TestStructures\UnsupportedStruct.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

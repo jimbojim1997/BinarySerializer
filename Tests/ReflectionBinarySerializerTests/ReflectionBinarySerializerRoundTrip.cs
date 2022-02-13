@@ -1,14 +1,15 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
-namespace Tests.ReflectionBinarySerializer
+using Tests.TestStructures;
+
+namespace Tests.ReflectionBinarySerializerTests
 {
     [TestClass]
-    public class ReflectionBinarySerializerRountTrip
+    public class ReflectionBinarySerializerRoundTrip
     {
         [DataTestMethod]
         [DataRow(0)]
@@ -166,7 +167,7 @@ namespace Tests.ReflectionBinarySerializer
         {
             AssertRoundTrip((decimal)value);
         }
-        
+
         [DataTestMethod]
         [DataRow((string)null)]
         [DataRow("")]
@@ -219,7 +220,7 @@ namespace Tests.ReflectionBinarySerializer
         [TestMethod]
         public void StructArrayRoundTrip()
         {
-            AssertRoundTrip(new ExampleStruct[] { new ExampleStruct() {A = 123,B = "Test Text"}, new ExampleStruct() { A = 456, B = "Hello, World!" } }, (a, b) => a.SequenceEqual(b, new ExampleStructEqualityComparer()));
+            AssertRoundTrip(new ExampleStruct[] { new ExampleStruct() { A = 123, B = "Test Text" }, new ExampleStruct() { A = 456, B = "Hello, World!" } }, (a, b) => a.SequenceEqual(b, new ExampleStructEqualityComparer()));
         }
 
         [TestMethod]
@@ -257,45 +258,6 @@ namespace Tests.ReflectionBinarySerializer
                 T actual = serializer.Deserialize<T>(ms);
 
                 Assert.IsTrue(areEqual(expected, actual));
-            }
-        }
-
-        private struct ExampleStruct
-        {
-            public int A;
-            public string B;
-        }
-
-        private class ExampleClass
-        {
-            public int A;
-            public string B;
-            public ExampleClass C;
-        }
-
-        private class ExampleStructEqualityComparer : IEqualityComparer<ExampleStruct>
-        {
-            public bool Equals(ExampleStruct x, ExampleStruct y)
-            {
-                return x.A == y.A && x.B == y.B;
-            }
-
-            public int GetHashCode(ExampleStruct obj)
-            {
-                return obj.GetHashCode();
-            }
-        }
-
-        private class ExampleClassEqualityComparer : IEqualityComparer<ExampleClass>
-        {
-            public bool Equals(ExampleClass x, ExampleClass y)
-            {
-                return x.A == y.A && x.B == y.B;
-            }
-
-            public int GetHashCode(ExampleClass obj)
-            {
-                throw new NotImplementedException();
             }
         }
     }

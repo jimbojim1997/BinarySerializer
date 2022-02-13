@@ -12,6 +12,7 @@ namespace BinarySerializer
 
         internal static byte DeserializeByte(Stream stream)
         {
+            if (IsEndOfStream(stream)) throw new EndOfStreamException();
             return (byte)stream.ReadByte();
         }
 
@@ -22,6 +23,7 @@ namespace BinarySerializer
 
         internal static sbyte DeserializeSByte(Stream stream)
         {
+            if (IsEndOfStream(stream)) throw new EndOfStreamException();
             return (sbyte)DeserializeByte(stream);
         }
 
@@ -32,6 +34,7 @@ namespace BinarySerializer
 
         internal static bool DeserializeBoolean(Stream stream)
         {
+            if (IsEndOfStream(stream)) throw new EndOfStreamException();
             return stream.ReadByte() != 0;
         }
 
@@ -46,6 +49,7 @@ namespace BinarySerializer
 
         internal static short DeserializeShort(Stream stream)
         {
+            if (IsEndOfStream(stream)) throw new EndOfStreamException();
             byte[] bytes = new byte[2];
             stream.Read(bytes, 0, bytes.Length);
             return (short)(bytes[0] | bytes[1] << 8);
@@ -58,6 +62,7 @@ namespace BinarySerializer
 
         internal static ushort DeserializeUShort(Stream stream)
         {
+            if (IsEndOfStream(stream)) throw new EndOfStreamException();
             return (ushort)DeserializeShort(stream);
         }
 
@@ -68,6 +73,7 @@ namespace BinarySerializer
 
         internal static char DeserializeChar(Stream stream)
         {
+            if (IsEndOfStream(stream)) throw new EndOfStreamException();
             return (char)DeserializeShort(stream);
         }
 
@@ -84,6 +90,7 @@ namespace BinarySerializer
 
         internal static int DeserializeInt(Stream stream)
         {
+            if (IsEndOfStream(stream)) throw new EndOfStreamException();
             byte[] bytes = new byte[4];
             stream.Read(bytes, 0, bytes.Length);
             return (int)(bytes[0] | bytes[1] << 8 | bytes[2] << 16 | bytes[3] << 24);
@@ -96,6 +103,7 @@ namespace BinarySerializer
 
         internal static uint DeserializeUInt(Stream stream)
         {
+            if (IsEndOfStream(stream)) throw new EndOfStreamException();
             return (uint)DeserializeInt(stream);
         }
 
@@ -109,6 +117,7 @@ namespace BinarySerializer
 
         internal static float DeserializeFloat(Stream stream)
         {
+            if (IsEndOfStream(stream)) throw new EndOfStreamException();
             unsafe
             {
                 int value = DeserializeInt(stream);
@@ -133,6 +142,7 @@ namespace BinarySerializer
 
         internal static long DeserializeLong(Stream stream)
         {
+            if (IsEndOfStream(stream)) throw new EndOfStreamException();
             byte[] bytes = new byte[8];
             stream.Read(bytes, 0, bytes.Length);
             long low = ((long)bytes[0] | (long)bytes[1] << 8 | (long)bytes[2] << 16 | (long)bytes[3] << 24);
@@ -147,6 +157,7 @@ namespace BinarySerializer
 
         internal static ulong DeserializeULong(Stream stream)
         {
+            if (IsEndOfStream(stream)) throw new EndOfStreamException();
             return (ulong)DeserializeLong(stream);
         }
 
@@ -160,6 +171,7 @@ namespace BinarySerializer
 
         internal static double DeserializeDouble(Stream stream)
         {
+            if (IsEndOfStream(stream)) throw new EndOfStreamException();
             unsafe
             {
                 long value = DeserializeLong(stream);
@@ -178,6 +190,7 @@ namespace BinarySerializer
 
         internal static decimal DeserializeDecimal(Stream stream)
         {
+            if (IsEndOfStream(stream)) throw new EndOfStreamException();
             int[] bits = new int[]
             {
                 DeserializeInt(stream),
@@ -197,6 +210,7 @@ namespace BinarySerializer
 
         internal static string DeserializeString(Stream stream)
         {
+            if (IsEndOfStream(stream)) throw new EndOfStreamException();
             uint length = DeserializeUInt(stream);
             byte[] bytes = new byte[(int)length];
             stream.Read(bytes, 0, bytes.Length);
@@ -213,5 +227,9 @@ namespace BinarySerializer
             return DeserializeUInt(stream);
         }
 
+        internal static bool IsEndOfStream(Stream stream)
+        {
+            return stream.Position == stream.Length;
+        }
     }
 }
