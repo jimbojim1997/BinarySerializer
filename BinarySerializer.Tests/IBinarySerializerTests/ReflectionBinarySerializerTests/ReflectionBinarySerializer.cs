@@ -75,33 +75,6 @@ namespace BinarySerializer.Tests.IBinarySerializerTests.ReflectionBinarySerializ
             Assert.ThrowsException<ArgumentException>(() => serializer.Serialize(10, new StubStreamNonReadWrite()));
         }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
         [TestMethod]
         public void DeserializeThrowSerializationException()
         {
