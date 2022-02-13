@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Tests.TestStructures
+namespace BinarySerializer.Tests.TestStructures
 {
     internal class ExampleClass
     {

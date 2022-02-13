@@ -6,8 +6,8 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{0391611A-B027-4BD0-99D9-F08FB03C9028}</ProjectGuid>
     <OutputType>Exe</OutputType>
-    <RootNamespace>Sandbox</RootNamespace>
-    <AssemblyName>Sandbox</AssemblyName>
+    <RootNamespace>BinartSerializer.Sandbox</RootNamespace>
+    <AssemblyName>BinartSerializer.Sandbox</AssemblyName>
     <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>

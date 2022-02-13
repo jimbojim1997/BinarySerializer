@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace Tests.TestStructures
+namespace BinarySerializer.Tests.TestStructures
 {
     internal struct ExampleStruct
     {

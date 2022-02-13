@@ -3,10 +3,10 @@
 using System;
 using System.IO;
 
-using Tests.Extensions;
-using Tests.TestStructures;
+using BinarySerializer.Tests.Extensions;
+using BinarySerializer.Tests.TestStructures;
 
-namespace Tests.ReflectionBinarySerializerTests
+namespace BinarySerializer.Tests.ReflectionBinarySerializerTests
 {
     [TestClass]
     public class ReflectionBinarySerializer

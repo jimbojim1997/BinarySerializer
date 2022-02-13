@@ -5,7 +5,7 @@ using System.IO;
 
 using BinarySerializer;
 
-namespace Tests.SerializationHelpersTests
+namespace BinarySerializer.Tests.SerializationHelpersTests
 {
     [TestClass]
     public class SerializationEndOfStreamException

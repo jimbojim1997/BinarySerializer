@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Tests.TestStructures
+namespace BinarySerializer.Tests.TestStructures
 {
     internal struct UnsupportedStruct
     {

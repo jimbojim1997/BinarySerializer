@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
 
-namespace Tests.TestStructures
+namespace BinarySerializer.Tests.TestStructures
 {
     internal class StubStreamNonReadWrite : Stream
     {

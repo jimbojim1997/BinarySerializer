@@ -5,9 +5,9 @@ VisualStudioVersion = 17.0.32112.339
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BinarySerializer", "BinarySerializer\BinarySerializer.csproj", "{3679EB51-83C6-4E78-968E-8DDCE44452C1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sandbox", "Sandbox\Sandbox.csproj", "{0391611A-B027-4BD0-99D9-F08FB03C9028}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BinarySerializer.Sandbox", "BinarySerializer.Sandbox\BinarySerializer.Sandbox.csproj", "{0391611A-B027-4BD0-99D9-F08FB03C9028}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tests", "Tests\Tests.csproj", "{A9A7414C-6038-4428-9392-B211BAFC380E}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BinarySerializer.Tests", "BinarySerializer.Tests\BinarySerializer.Tests.csproj", "{A9A7414C-6038-4428-9392-B211BAFC380E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -2,7 +2,7 @@
 
 using System;
 
-namespace Tests.Extensions
+namespace BinarySerializer.Tests.Extensions
 {
     internal static class AssertExtensions
     {
