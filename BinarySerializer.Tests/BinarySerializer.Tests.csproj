@@ -50,6 +50,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Extensions\AssertExtensions.cs" />
+    <Compile Include="IBinarySerializerTests\ImplementationCompatibilityTests\ReflectionBinarySerializerToCompiledBinarySerializer.cs" />
+    <Compile Include="IBinarySerializerTests\ImplementationCompatibilityTests\CompiledBinarySerializerToReflectionBinarySerializer.cs" />
     <Compile Include="IBinarySerializerTests\BinarySerializerRountTripTestsBase.cs" />
     <Compile Include="IBinarySerializerTests\BinarySerializerTestsBase.cs" />
     <Compile Include="IBinarySerializerTests\CompiledBinarySerializerTests\CompiledBinarySerializer.cs" />
