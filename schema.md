@@ -23,13 +23,13 @@ All primitives are stored in [Little Endian byte order](https://en.wikipedia.org
 
 ## Non-primitives
 
-| Type | | | | |
-|------|---|---|---|---|
-| `struct` | struct data inline | |
-| `object` [^3] | `uint32` object ID | object data inline | |
-| `null` [^4] | `uint32` object ID `0` (zero) | | |
-| `string (UTF-8)` [^3] | `uint32` object ID | `uint32` byte length | `byte` data inline | |
-| `array` [^3] [^5] | `uint32` object ID | `uint32` item count | data inline | |
+| Type | | | | | |
+|------|---|---|---|---|---|
+| `struct` | struct data inline | | | | |
+| `object` [^3] | `uint32` object ID | object data inline | | | |
+| `null` [^4] | `uint32` object ID `0` (zero) | | | | |
+| `string (UTF-8)` [^3] | `uint32` object ID | `uint32` byte length | `byte` data inline | | |
+| `array` [^3] [^5] | `uint32` object ID | `uint32` item count | data inline | | |
 | `decimal` [^3] [^6] | `uint32` object ID | `int32` `[0]` |`int32` `[1]` |`int32` `[2]` |`int32` `[3]` |
 
 [^1]: A `0` (zero) value represents `false`. Any none `0` (zero) value represents `true`.
