@@ -204,6 +204,12 @@ namespace BinarySerializer.Tests.IBinarySerializerTests
         }
 
         [TestMethod]
+        public void NullArrayRoundTrip()
+        {
+            AssertRoundTrip((int[])null);
+        }
+
+        [TestMethod]
         public void EmptyArrayRoundTrip()
         {
             AssertRoundTrip(new int[0], (a, b) => a.SequenceEqual(b));
@@ -228,7 +234,7 @@ namespace BinarySerializer.Tests.IBinarySerializerTests
         }
 
         [TestMethod]
-        public void NullArrayRoundTrip()
+        public void ClassArrayOfNullRoundTrip()
         {
             AssertRoundTrip(new ExampleClass[] { null, null }, (a, b) => a.SequenceEqual(b));
         }

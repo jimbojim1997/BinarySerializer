@@ -13,7 +13,7 @@ namespace BinarySerializer.Tests.TestStructures
     {
         public bool Equals(ExampleClass x, ExampleClass y)
         {
-            return x.A == y.A && x.B == y.B;
+            return x?.A == y?.A && x?.B == y?.B;
         }
 
         public int GetHashCode(ExampleClass obj)
