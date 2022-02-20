@@ -181,7 +181,8 @@ namespace BinarySerializer.Tests.IBinarySerializerTests
             AssertRoundTrip(new ExampleStruct()
             {
                 A = 123,
-                B = "Test Text"
+                B = "Test Text",
+                D = 456.789M
             }, (a, b) => a.A == b.A && a.B == b.B);
         }
 
@@ -191,7 +192,8 @@ namespace BinarySerializer.Tests.IBinarySerializerTests
             ExampleClass e = new ExampleClass()
             {
                 A = 123,
-                B = "Test Text"
+                B = "Test Text",
+                D = 123.456M
             };
             e.C = e;
             AssertRoundTrip(e, (a, b) => a.A == b.A && a.B == b.B && b == b.C && b == b.C.C);
@@ -224,13 +226,13 @@ namespace BinarySerializer.Tests.IBinarySerializerTests
         [TestMethod]
         public void StructArrayRoundTrip()
         {
-            AssertRoundTrip(new ExampleStruct[] { new ExampleStruct() { A = 123, B = "Test Text" }, new ExampleStruct() { A = 456, B = "Hello, World!" } }, (a, b) => a.SequenceEqual(b, new ExampleStructEqualityComparer()));
+            AssertRoundTrip(new ExampleStruct[] { new ExampleStruct() { A = 123, B = "Test Text", D = 123.456M }, new ExampleStruct() { A = 456, B = "Hello, World!", D = 456.789M } }, (a, b) => a.SequenceEqual(b, new ExampleStructEqualityComparer()));
         }
 
         [TestMethod]
         public void ClassArrayRoundTrip()
         {
-            AssertRoundTrip(new ExampleClass[] { new ExampleClass() { A = 123, B = "Test Text" }, new ExampleClass() { A = 456, B = "Hello, World!" } }, (a, b) => a.SequenceEqual(b, new ExampleClassEqualityComparer()));
+            AssertRoundTrip(new ExampleClass[] { new ExampleClass() { A = 123, B = "Test Text", D = 123.456M }, new ExampleClass() { A = 456, B = "Hello, World!", D = 456.789M } }, (a, b) => a.SequenceEqual(b, new ExampleClassEqualityComparer()));
         }
 
         [TestMethod]

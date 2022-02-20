@@ -136,6 +136,19 @@ namespace BinarySerializer
             il.Emit(OpCodes.Ldarg_1); //Stream
 
             //TODO wrap in exception handler
+            EmitPrimitiveMethodCall(type, il);
+
+            il.Emit(OpCodes.Ret);
+        }
+
+        /// <summary>
+        /// Expected execution stack: T, Stream.
+        /// </summary>
+        /// <param name="type"></param>
+        /// <param name="il"></param>
+        /// <exception cref="UnsupportedTypeException"></exception>
+        private void EmitPrimitiveMethodCall(Type type, ILGenerator il)
+        {
             if (type.Equals(typeof(byte))) il.Emit(OpCodes.Call, _serializeByte);
             else if (type.Equals(typeof(sbyte))) il.Emit(OpCodes.Call, _serializeSByte);
             else if (type.Equals(typeof(bool))) il.Emit(OpCodes.Call, _serializeBoolean);
@@ -149,8 +162,6 @@ namespace BinarySerializer
             else if (type.Equals(typeof(ulong))) il.Emit(OpCodes.Call, _serializeULong);
             else if (type.Equals(typeof(double))) il.Emit(OpCodes.Call, _serializeDouble);
             else throw new UnsupportedTypeException(type, $"Primitive type \"{type.FullName}\" not supported.");
-
-            il.Emit(OpCodes.Ret);
         }
 
         private void EmitStringSerialize(DynamicMethod method)
@@ -240,8 +251,19 @@ namespace BinarySerializer
             il.Emit(OpCodes.Ldloc, index);
             il.Emit(OpCodes.Ldelem, elementType);
             il.Emit(OpCodes.Ldarg_1); //Stream
-            il.Emit(OpCodes.Ldarg_2); //SerializedObjectsCollection
-            il.Emit(OpCodes.Call, GetOrRegisterSerializeMethodInfo(elementType));
+            if (elementType.IsPrimitive)
+            {
+                EmitPrimitiveMethodCall(elementType, il);
+            }
+            else if (elementType.Equals(typeof(decimal)))
+            {
+                il.Emit(OpCodes.Call, _serializeDecimal);
+            }
+            else
+            {
+                il.Emit(OpCodes.Ldarg_2); //SerializedObjectsCollection
+                il.Emit(OpCodes.Call, GetOrRegisterSerializeMethodInfo(elementType));
+            }
 
             il.Emit(OpCodes.Ldc_I4_1);
             il.Emit(OpCodes.Ldloc, index);
@@ -280,16 +302,26 @@ namespace BinarySerializer
             il.Emit(OpCodes.Ldarg_1); //Stream
             il.Emit(OpCodes.Call, _serializeObjectId);
 
-            foreach(FieldInfo field in type.GetRuntimeFields())
+            foreach (FieldInfo field in type.GetRuntimeFields())
             {
                 if (field.IsLiteral || field.IsStatic) continue;
                 //TODO wrap field serialize in exception handler
-                //TODO Maybe emit primitive serialization inline?
                 il.Emit(OpCodes.Ldarg_0); //T
                 il.Emit(OpCodes.Ldfld, field);
                 il.Emit(OpCodes.Ldarg_1); //Stream
-                il.Emit(OpCodes.Ldarg_2); //SerializedObjectsCollection
-                il.Emit(OpCodes.Call, GetOrRegisterSerializeMethodInfo(field.FieldType));
+                if (field.FieldType.IsPrimitive)
+                {
+                    EmitPrimitiveMethodCall(field.FieldType, il);
+                }
+                else if (field.FieldType.Equals(typeof(decimal)))
+                {
+                    il.Emit(OpCodes.Call, _serializeDecimal);
+                }
+                else
+                {
+                    il.Emit(OpCodes.Ldarg_2); //SerializedObjectsCollection
+                    il.Emit(OpCodes.Call, GetOrRegisterSerializeMethodInfo(field.FieldType));
+                }
             }
             il.Emit(OpCodes.Br, endOfMethod);
 
@@ -310,12 +342,22 @@ namespace BinarySerializer
             {
                 if (field.IsLiteral || field.IsStatic) continue;
                 //TODO wrap field serialize in exception handler
-                //TODO Maybe emit primitive serialization inline?
                 il.Emit(OpCodes.Ldarg_0); //T
                 il.Emit(OpCodes.Ldfld, field);
                 il.Emit(OpCodes.Ldarg_1); //Stream
-                il.Emit(OpCodes.Ldarg_2); //SerializedObjectsCollection
-                il.Emit(OpCodes.Call, GetOrRegisterSerializeMethodInfo(field.FieldType));
+                if (field.FieldType.IsPrimitive)
+                {
+                    EmitPrimitiveMethodCall(field.FieldType, il);
+                }
+                else if (field.FieldType.Equals(typeof(decimal)))
+                {
+                    il.Emit(OpCodes.Call, _serializeDecimal);
+                }
+                else
+                {
+                    il.Emit(OpCodes.Ldarg_2); //SerializedObjectsCollection
+                    il.Emit(OpCodes.Call, GetOrRegisterSerializeMethodInfo(field.FieldType));
+                }
             }
 
             il.Emit(OpCodes.Ret);
