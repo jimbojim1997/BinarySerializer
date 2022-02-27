@@ -52,8 +52,15 @@ namespace BinarySerializer
 
         private static readonly MethodInfo _getUninitializedObject = typeof(FormatterServices).GetMethod(nameof(FormatterServices.GetUninitializedObject));
         private static readonly MethodInfo _getTypeFromHandle = typeof(Type).GetMethod(nameof(Type.GetTypeFromHandle));
-        #endregion
 
+        private static readonly MethodInfo _createSerializationException = typeof(CompiledBinarySerializer).GetMethod(nameof(CompiledBinarySerializer.CreateSerializationException), BindingFlags.Static | BindingFlags.NonPublic);
+        private static readonly MethodInfo _createArraySerializationException = typeof(CompiledBinarySerializer).GetMethod(nameof(CompiledBinarySerializer.CreateArraySerializationException), BindingFlags.Static | BindingFlags.NonPublic);
+        private static readonly MethodInfo _createFieldSerializationException = typeof(CompiledBinarySerializer).GetMethod(nameof(CompiledBinarySerializer.CreateFieldSerializationException), BindingFlags.Static | BindingFlags.NonPublic);
+
+        private static readonly MethodInfo _createDeserializationException = typeof(CompiledBinarySerializer).GetMethod(nameof(CompiledBinarySerializer.CreateDeserializationException), BindingFlags.Static | BindingFlags.NonPublic);
+        private static readonly MethodInfo _createArrayDeserializationException = typeof(CompiledBinarySerializer).GetMethod(nameof(CompiledBinarySerializer.CreateArrayDeserializationException), BindingFlags.Static | BindingFlags.NonPublic);
+        private static readonly MethodInfo _createFieldDeserializationException = typeof(CompiledBinarySerializer).GetMethod(nameof(CompiledBinarySerializer.CreateFieldDeserializationException), BindingFlags.Static | BindingFlags.NonPublic);
+        #endregion
 
         private readonly object _serializeLock = new object();
         private readonly ConcurrentDictionary<Type, MethodInfo> _serializeMethodInfoCache = new ConcurrentDictionary<Type, MethodInfo>();
@@ -68,8 +75,19 @@ namespace BinarySerializer
             if (stream is null) throw new ArgumentNullException(nameof(stream));
             if (!stream.CanWrite) throw new ArgumentException("The stream must be writeable.", nameof(stream));
 
-            SerializeObjectDelegate<T> serialize = (SerializeObjectDelegate<T>)GetOrRegisterSerializeDelegate(typeof(T));
-            serialize(obj, stream, new SerializedObjectsCollection());
+            try
+            {
+                SerializeObjectDelegate<T> serialize = (SerializeObjectDelegate<T>)GetOrRegisterSerializeDelegate(typeof(T));
+                serialize(obj, stream, new SerializedObjectsCollection());
+            }
+            catch (SerializationException)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                throw new SerializationException(obj, typeof(T), $"Unable to serialize type \"{typeof(T).FullName}\".", ex);
+            }
         }
 
         public void RegisterSerialize<T>()
@@ -159,11 +177,24 @@ namespace BinarySerializer
         private void EmitPrimitiveSerialize(Type type, DynamicMethod method)
         {
             ILGenerator il = method.GetILGenerator();
+            var exceptionEnd = il.BeginExceptionBlock();
+
             il.Emit(OpCodes.Ldarg_0); //T
             il.Emit(OpCodes.Ldarg_1); //Stream
-
-            //TODO wrap in exception handler
             EmitPrimitiveSerializeMethodCall(type, il);
+            il.Emit(OpCodes.Leave, exceptionEnd);
+
+            il.BeginCatchBlock(typeof(Exception));
+            var exception = il.DeclareLocal(typeof(Exception));
+            il.Emit(OpCodes.Stloc, exception);
+            il.Emit(OpCodes.Ldarg_0); //T
+            il.Emit(OpCodes.Box, type);
+            il.Emit(OpCodes.Ldtoken, type);
+            il.Emit(OpCodes.Call, _getTypeFromHandle);
+            il.Emit(OpCodes.Ldloc, exception);
+            il.Emit(OpCodes.Call, _createSerializationException);
+            il.Emit(OpCodes.Throw);
+            il.EndExceptionBlock();
 
             il.Emit(OpCodes.Ret);
         }
@@ -194,11 +225,12 @@ namespace BinarySerializer
         private void EmitStringSerialize(DynamicMethod method)
         {
             ILGenerator il = method.GetILGenerator();
+
             var objectId = il.DeclareLocal(typeof(uint));
             var objectExists = il.DefineLabel();
             var endOfMethod = il.DefineLabel();
+            var exceptionEnd = il.BeginExceptionBlock();
 
-            //TODO wrap in exception handler
             il.Emit(OpCodes.Ldarg_2); //SerializedObjectsCollection
             il.Emit(OpCodes.Ldarg_0); //string
             il.Emit(OpCodes.Ldloca, objectId);
@@ -222,15 +254,44 @@ namespace BinarySerializer
             il.Emit(OpCodes.Call, _serializeObjectId);
 
             il.MarkLabel(endOfMethod);
+            il.Emit(OpCodes.Leave, exceptionEnd);
+
+            il.BeginCatchBlock(typeof(Exception));
+            var exception = il.DeclareLocal(typeof(Exception));
+            il.Emit(OpCodes.Stloc, exception);
+            il.Emit(OpCodes.Ldarg_0); //string
+            il.Emit(OpCodes.Ldtoken, typeof(string));
+            il.Emit(OpCodes.Call, _getTypeFromHandle);
+            il.Emit(OpCodes.Ldloc, exception);
+            il.Emit(OpCodes.Call, _createSerializationException);
+            il.Emit(OpCodes.Throw);
+            il.EndExceptionBlock();
+
             il.Emit(OpCodes.Ret);
         }
 
         private void EmitDecimalSerialize(DynamicMethod method)
         {
             ILGenerator il = method.GetILGenerator();
+            var exceptionEnd = il.BeginExceptionBlock();
+
             il.Emit(OpCodes.Ldarg_0); //decimal
             il.Emit(OpCodes.Ldarg_1); //Stream
             il.Emit(OpCodes.Call, _serializeDecimal);
+
+            il.Emit(OpCodes.Leave, exceptionEnd);
+            il.BeginCatchBlock(typeof(Exception));
+            var exception = il.DeclareLocal(typeof(Exception));
+            il.Emit(OpCodes.Stloc, exception);
+            il.Emit(OpCodes.Ldarg_0); //decimal
+            il.Emit(OpCodes.Box, typeof(decimal));
+            il.Emit(OpCodes.Ldtoken, typeof(decimal));
+            il.Emit(OpCodes.Call, _getTypeFromHandle);
+            il.Emit(OpCodes.Ldloc, exception);
+            il.Emit(OpCodes.Call, _createSerializationException);
+            il.Emit(OpCodes.Throw);
+            il.EndExceptionBlock();
+
             il.Emit(OpCodes.Ret);
         }
 
@@ -246,7 +307,6 @@ namespace BinarySerializer
             var endOfLoop = il.DefineLabel();
             var endOfMethod = il.DefineLabel();
 
-            //TODO wrap in exception handler
             il.Emit(OpCodes.Ldarg_2); //SerializedObjectsCollection
             il.Emit(OpCodes.Ldarg_0); //T[]
             il.Emit(OpCodes.Ldloca, objectId);
@@ -273,14 +333,22 @@ namespace BinarySerializer
             il.Emit(OpCodes.Clt);
             il.Emit(OpCodes.Brfalse, endOfLoop);
 
-            //TODO wrap loop inner in exception handler
+            var exceptionEnd = il.BeginExceptionBlock();
+
             il.Emit(OpCodes.Ldarg_0); //T[]
             il.Emit(OpCodes.Ldloc, index);
             il.Emit(OpCodes.Ldelem, elementType);
             il.Emit(OpCodes.Ldarg_1); //Stream
             if (elementType.IsPrimitive)
             {
-                EmitPrimitiveSerializeMethodCall(elementType, il);
+                try
+                {
+                    EmitPrimitiveSerializeMethodCall(elementType, il);
+                }
+                catch (Exception ex)
+                {
+                    throw new ArraySerializationException(null, type, 0, type.GetElementType(), $"Unable to create serialization method for array of type \"{type.FullName}\".", ex);
+                }
             }
             else if (elementType.Equals(typeof(decimal)))
             {
@@ -291,6 +359,20 @@ namespace BinarySerializer
                 il.Emit(OpCodes.Ldarg_2); //SerializedObjectsCollection
                 il.Emit(OpCodes.Call, GetOrRegisterSerializeMethodInfo(elementType));
             }
+
+            il.Emit(OpCodes.Leave, exceptionEnd);
+
+            il.BeginCatchBlock(typeof(Exception));
+            var exception = il.DeclareLocal(typeof(Exception));
+            il.Emit(OpCodes.Stloc, exception);
+            il.Emit(OpCodes.Ldarg_0); //T[]
+            il.Emit(OpCodes.Ldtoken, type);
+            il.Emit(OpCodes.Call, _getTypeFromHandle);
+            il.Emit(OpCodes.Ldloc, index);
+            il.Emit(OpCodes.Ldloc, exception);
+            il.Emit(OpCodes.Call, _createArraySerializationException);
+            il.Emit(OpCodes.Throw);
+            il.EndExceptionBlock();
 
             il.Emit(OpCodes.Ldc_I4_1);
             il.Emit(OpCodes.Ldloc, index);
@@ -316,7 +398,6 @@ namespace BinarySerializer
             var objectExists = il.DefineLabel();
             var endOfMethod = il.DefineLabel();
 
-            //TODO wrap in exception handler
             il.Emit(OpCodes.Ldarg_2); //SerializedObjectsCollection
             il.Emit(OpCodes.Ldarg_0); //T
             il.Emit(OpCodes.Ldloca, objectId);
@@ -332,13 +413,22 @@ namespace BinarySerializer
             foreach (FieldInfo field in type.GetRuntimeFields())
             {
                 if (field.IsLiteral || field.IsStatic) continue;
-                //TODO wrap field serialize in exception handler
+
+                var exceptionEnd = il.BeginExceptionBlock();
+
                 il.Emit(OpCodes.Ldarg_0); //T
                 il.Emit(OpCodes.Ldfld, field);
                 il.Emit(OpCodes.Ldarg_1); //Stream
                 if (field.FieldType.IsPrimitive)
                 {
-                    EmitPrimitiveSerializeMethodCall(field.FieldType, il);
+                    try
+                    {
+                        EmitPrimitiveSerializeMethodCall(field.FieldType, il);
+                    }
+                    catch (Exception ex)
+                    {
+                        throw new FieldSerializationException(null, type, field.Name, field.FieldType, $"Unable to create serialization method for field \"{type.FullName}.{field.Name}\", type \"{field.FieldType.FullName}\".", ex);
+                    }
                 }
                 else if (field.FieldType.Equals(typeof(decimal)))
                 {
@@ -349,6 +439,22 @@ namespace BinarySerializer
                     il.Emit(OpCodes.Ldarg_2); //SerializedObjectsCollection
                     il.Emit(OpCodes.Call, GetOrRegisterSerializeMethodInfo(field.FieldType));
                 }
+
+                il.Emit(OpCodes.Leave, exceptionEnd);
+
+                il.BeginCatchBlock(typeof(Exception));
+                var exception = il.DeclareLocal(typeof(Exception));
+                il.Emit(OpCodes.Stloc, exception);
+                il.Emit(OpCodes.Ldarg_0); //T
+                il.Emit(OpCodes.Ldtoken, type);
+                il.Emit(OpCodes.Call, _getTypeFromHandle);
+                il.Emit(OpCodes.Ldstr, field.Name);
+                il.Emit(OpCodes.Ldtoken, field.FieldType);
+                il.Emit(OpCodes.Call, _getTypeFromHandle);
+                il.Emit(OpCodes.Ldloc, exception);
+                il.Emit(OpCodes.Call, _createFieldSerializationException);
+                il.Emit(OpCodes.Throw);
+                il.EndExceptionBlock();
             }
             il.Emit(OpCodes.Br, endOfMethod);
 
@@ -368,13 +474,22 @@ namespace BinarySerializer
             foreach (FieldInfo field in type.GetRuntimeFields())
             {
                 if (field.IsLiteral || field.IsStatic) continue;
-                //TODO wrap field serialize in exception handler
+
+                var exceptionEnd = il.BeginExceptionBlock();
+
                 il.Emit(OpCodes.Ldarg_0); //T
                 il.Emit(OpCodes.Ldfld, field);
                 il.Emit(OpCodes.Ldarg_1); //Stream
                 if (field.FieldType.IsPrimitive)
                 {
-                    EmitPrimitiveSerializeMethodCall(field.FieldType, il);
+                    try
+                    {
+                        EmitPrimitiveSerializeMethodCall(field.FieldType, il);
+                    }
+                    catch (UnsupportedTypeException ex)
+                    {
+                        throw new FieldSerializationException(null, type, field.Name, field.FieldType, $"Unable to create serialization method for field \"{type.FullName}.{field.Name}\", type \"{field.FieldType.FullName}\".", ex);
+                    }
                 }
                 else if (field.FieldType.Equals(typeof(decimal)))
                 {
@@ -385,6 +500,23 @@ namespace BinarySerializer
                     il.Emit(OpCodes.Ldarg_2); //SerializedObjectsCollection
                     il.Emit(OpCodes.Call, GetOrRegisterSerializeMethodInfo(field.FieldType));
                 }
+
+                il.Emit(OpCodes.Leave, exceptionEnd);
+
+                il.BeginCatchBlock(typeof(Exception));
+                var exception = il.DeclareLocal(typeof(Exception));
+                il.Emit(OpCodes.Stloc, exception);
+                il.Emit(OpCodes.Ldarg_0); //T
+                il.Emit(OpCodes.Box, type);
+                il.Emit(OpCodes.Ldtoken, type);
+                il.Emit(OpCodes.Call, _getTypeFromHandle);
+                il.Emit(OpCodes.Ldstr, field.Name);
+                il.Emit(OpCodes.Ldtoken, field.FieldType);
+                il.Emit(OpCodes.Call, _getTypeFromHandle);
+                il.Emit(OpCodes.Ldloc, exception);
+                il.Emit(OpCodes.Call, _createFieldSerializationException);
+                il.Emit(OpCodes.Throw);
+                il.EndExceptionBlock();
             }
 
             il.Emit(OpCodes.Ret);
@@ -395,8 +527,19 @@ namespace BinarySerializer
             if (stream is null) throw new ArgumentNullException(nameof(stream));
             if (!stream.CanRead) throw new ArgumentException("The stream must be readable.", nameof(stream));
 
-            DeserializeObjectDelegate<T> deserialize = (DeserializeObjectDelegate<T>)GetOrRegisterDeserializeDelegate(typeof(T));
-            return deserialize(stream, new DeserializedObjectsCollection());
+            try
+            {
+                DeserializeObjectDelegate<T> deserialize = (DeserializeObjectDelegate<T>)GetOrRegisterDeserializeDelegate(typeof(T));
+                return deserialize(stream, new DeserializedObjectsCollection());
+            }
+            catch (SerializationException)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                throw new SerializationException(null, typeof(T), $"Unable to deserialize type \"{typeof(T).FullName}\".", ex);
+            }
         }
 
         public void RegisterDeserialize<T>()
@@ -486,11 +629,25 @@ namespace BinarySerializer
         private void EmitPrimitiveDeserialize(Type type, DynamicMethod method)
         {
             ILGenerator il = method.GetILGenerator();
+            var value = il.DeclareLocal(type);
+
+            var exceptionEnd = il.BeginExceptionBlock();
+
             il.Emit(OpCodes.Ldarg_0); //Stream
-
-            //TODO wrap in exception handler
             EmitPrimitiveDeserializeMethodCall(type, il);
-
+            il.Emit(OpCodes.Stloc, value);
+            il.Emit(OpCodes.Leave, exceptionEnd);
+            il.BeginCatchBlock(typeof(Exception));
+            var exception = il.DeclareLocal(typeof(Exception));
+            il.Emit(OpCodes.Stloc, exception);
+            il.Emit(OpCodes.Ldnull);
+            il.Emit(OpCodes.Ldtoken, type);
+            il.Emit(OpCodes.Call, _getTypeFromHandle);
+            il.Emit(OpCodes.Ldloc, exception);
+            il.Emit(OpCodes.Call, _createDeserializationException);
+            il.Emit(OpCodes.Throw);
+            il.EndExceptionBlock();
+            il.Emit(OpCodes.Ldloc, value);
             il.Emit(OpCodes.Ret);
         }
 
@@ -520,12 +677,12 @@ namespace BinarySerializer
         private void EmitStringDeserialize(DynamicMethod method)
         {
             ILGenerator il = method.GetILGenerator();
+
             var objectId = il.DeclareLocal(typeof(uint));
             var value = il.DeclareLocal(typeof(string));
             var valueExists = il.DefineLabel();
 
-            //TODO wrap in exception handler
-
+            var exceptionEnd = il.BeginExceptionBlock();
             il.Emit(OpCodes.Ldarg_0); //Stream
             il.Emit(OpCodes.Call, _deserializeObjectId);
             il.Emit(OpCodes.Stloc, objectId);
@@ -546,19 +703,47 @@ namespace BinarySerializer
             il.Emit(OpCodes.Call, _deserializedObjectsCollectionAdd);
 
             il.MarkLabel(valueExists);
-            il.Emit(OpCodes.Ldloc, value);
+            il.Emit(OpCodes.Leave, exceptionEnd);
 
+            il.BeginCatchBlock(typeof(Exception));
+            var exception = il.DeclareLocal(typeof(Exception));
+            il.Emit(OpCodes.Stloc, exception);
+            il.Emit(OpCodes.Ldnull);
+            il.Emit(OpCodes.Ldtoken, typeof(string));
+            il.Emit(OpCodes.Call, _getTypeFromHandle);
+            il.Emit(OpCodes.Ldloc, exception);
+            il.Emit(OpCodes.Call, _createDeserializationException);
+            il.Emit(OpCodes.Throw);
+            il.EndExceptionBlock();
+
+            il.Emit(OpCodes.Ldloc, value);
             il.Emit(OpCodes.Ret);
         }
 
         private void EmitDecimalDeserialize(DynamicMethod method)
         {
             ILGenerator il = method.GetILGenerator();
-
-            //TODO wrap in exception handler
+            var value = il.DeclareLocal(typeof(decimal));
+            var exceptionEnd = il.BeginExceptionBlock();
 
             il.Emit(OpCodes.Ldarg_0); //Stream
             il.Emit(OpCodes.Call, _deserializeDecimal);
+            il.Emit(OpCodes.Stloc, value);
+            il.Emit(OpCodes.Leave, exceptionEnd);
+
+            il.BeginCatchBlock(typeof(Exception));
+            var exception = il.DeclareLocal(typeof(Exception));
+            il.Emit(OpCodes.Stloc, exception);
+            il.Emit(OpCodes.Ldarg_0); //decimal
+            il.Emit(OpCodes.Box, typeof(decimal));
+            il.Emit(OpCodes.Ldtoken, typeof(decimal));
+            il.Emit(OpCodes.Call, _getTypeFromHandle);
+            il.Emit(OpCodes.Ldloc, exception);
+            il.Emit(OpCodes.Call, _createDeserializationException);
+            il.Emit(OpCodes.Throw);
+            il.EndExceptionBlock();
+
+            il.Emit(OpCodes.Ldloc, value);
             il.Emit(OpCodes.Ret);
         }
 
@@ -572,8 +757,6 @@ namespace BinarySerializer
             var valueExists = il.DefineLabel();
             var startOfLoop = il.DefineLabel();
             var endOfLoop = il.DefineLabel();
-
-            //TODO wrap in exception handler
 
             il.Emit(OpCodes.Ldarg_0); //Stream
             il.Emit(OpCodes.Call, _deserializeObjectId);
@@ -604,13 +787,21 @@ namespace BinarySerializer
             il.Emit(OpCodes.Clt);
             il.Emit(OpCodes.Brfalse, endOfLoop);
 
-            //TODO wrap loop inner in exception handler
+            var exceptionEnd = il.BeginExceptionBlock();
+
             il.Emit(OpCodes.Ldloc, array);
             il.Emit(OpCodes.Ldloc, index);
             il.Emit(OpCodes.Ldarg_0); //Stream;
             if (elementType.IsPrimitive)
             {
-                EmitPrimitiveDeserializeMethodCall(elementType, il);
+                try
+                {
+                    EmitPrimitiveDeserializeMethodCall(elementType, il);
+                }
+                catch (Exception ex)
+                {
+                    throw new ArraySerializationException(null, type, 0, type.GetElementType(), $"Unable to create deserialization method for array of type \"{type.FullName}\".", ex);
+                }
             }
             else if (elementType.Equals(typeof(decimal)))
             {
@@ -622,6 +813,19 @@ namespace BinarySerializer
                 il.Emit(OpCodes.Call, GetOrRegisterDeserializeMethodInfo(elementType));
             }
             il.Emit(OpCodes.Stelem, elementType);
+            il.Emit(OpCodes.Leave, exceptionEnd);
+
+            il.BeginCatchBlock(typeof(Exception));
+            var exception = il.DeclareLocal(typeof(Exception));
+            il.Emit(OpCodes.Stloc, exception);
+            il.Emit(OpCodes.Ldnull);
+            il.Emit(OpCodes.Ldtoken, type);
+            il.Emit(OpCodes.Call, _getTypeFromHandle);
+            il.Emit(OpCodes.Ldloc, index);
+            il.Emit(OpCodes.Ldloc, exception);
+            il.Emit(OpCodes.Call, _createArrayDeserializationException);
+            il.Emit(OpCodes.Throw);
+            il.EndExceptionBlock();
 
             il.Emit(OpCodes.Ldc_I4_1);
             il.Emit(OpCodes.Ldloc, index);
@@ -668,12 +872,21 @@ namespace BinarySerializer
             foreach (FieldInfo field in type.GetRuntimeFields())
             {
                 if (field.IsLiteral || field.IsStatic) continue;
-                //TODO wrap field deserialize in exception handler
+
+                var exceptionEnd = il.BeginExceptionBlock();
+
                 il.Emit(OpCodes.Ldloc, value);
                 il.Emit(OpCodes.Ldarg_0); //Stream
                 if (field.FieldType.IsPrimitive)
                 {
-                    EmitPrimitiveDeserializeMethodCall(field.FieldType, il);
+                    try
+                    {
+                        EmitPrimitiveDeserializeMethodCall(field.FieldType, il);
+                    }
+                    catch (UnsupportedTypeException ex)
+                    {
+                        throw new FieldSerializationException(null, type, field.Name, field.FieldType, $"Unable to create deserialization method for field \"{type.FullName}.{field.Name}\", type \"{field.FieldType.FullName}\".", ex);
+                    }
                 }
                 else if (field.FieldType.Equals(typeof(decimal)))
                 {
@@ -685,6 +898,21 @@ namespace BinarySerializer
                     il.Emit(OpCodes.Call, GetOrRegisterDeserializeMethodInfo(field.FieldType));
                 }
                 il.Emit(OpCodes.Stfld, field);
+                il.Emit(OpCodes.Leave, exceptionEnd);
+
+                il.BeginCatchBlock(typeof(Exception));
+                var exception = il.DeclareLocal(typeof(Exception));
+                il.Emit(OpCodes.Stloc, exception);
+                il.Emit(OpCodes.Ldnull);
+                il.Emit(OpCodes.Ldtoken, type);
+                il.Emit(OpCodes.Call, _getTypeFromHandle);
+                il.Emit(OpCodes.Ldstr, field.Name);
+                il.Emit(OpCodes.Ldtoken, field.FieldType);
+                il.Emit(OpCodes.Call, _getTypeFromHandle);
+                il.Emit(OpCodes.Ldloc, exception);
+                il.Emit(OpCodes.Call, _createFieldDeserializationException);
+                il.Emit(OpCodes.Throw);
+                il.EndExceptionBlock();
             }
 
             il.MarkLabel(valueExists);
@@ -698,19 +926,27 @@ namespace BinarySerializer
             ILGenerator il = method.GetILGenerator();
             var value = il.DeclareLocal(type);
 
-            //TODO wrap in exception handler
             il.Emit(OpCodes.Ldloca, value);
             il.Emit(OpCodes.Initobj, type);
 
             foreach (FieldInfo field in type.GetRuntimeFields())
             {
                 if (field.IsLiteral || field.IsStatic) continue;
-                //TODO wrap field deserialize in exception handler
+
+                var exceptionEnd = il.BeginExceptionBlock();
+
                 il.Emit(OpCodes.Ldloca, value);
                 il.Emit(OpCodes.Ldarg_0); //Stream
                 if (field.FieldType.IsPrimitive)
                 {
-                    EmitPrimitiveDeserializeMethodCall(field.FieldType, il);
+                    try
+                    {
+                        EmitPrimitiveDeserializeMethodCall(field.FieldType, il);
+                    }
+                    catch (UnsupportedTypeException ex)
+                    {
+                        throw new FieldSerializationException(null, type, field.Name, field.FieldType, $"Unable to create deserialization method for field \"{type.FullName}.{field.Name}\", type \"{field.FieldType.FullName}\".", ex);
+                    }
                 }
                 else if (field.FieldType.Equals(typeof(decimal)))
                 {
@@ -722,10 +958,55 @@ namespace BinarySerializer
                     il.Emit(OpCodes.Call, GetOrRegisterDeserializeMethodInfo(field.FieldType));
                 }
                 il.Emit(OpCodes.Stfld, field);
+                il.Emit(OpCodes.Leave, exceptionEnd);
+
+                il.BeginCatchBlock(typeof(Exception));
+                var exception = il.DeclareLocal(typeof(Exception));
+                il.Emit(OpCodes.Stloc, exception);
+                il.Emit(OpCodes.Ldnull);
+                il.Emit(OpCodes.Ldtoken, type);
+                il.Emit(OpCodes.Call, _getTypeFromHandle);
+                il.Emit(OpCodes.Ldstr, field.Name);
+                il.Emit(OpCodes.Ldtoken, field.FieldType);
+                il.Emit(OpCodes.Call, _getTypeFromHandle);
+                il.Emit(OpCodes.Ldloc, exception);
+                il.Emit(OpCodes.Call, _createFieldDeserializationException);
+                il.Emit(OpCodes.Throw);
+                il.EndExceptionBlock();
             }
 
             il.Emit(OpCodes.Ldloc, value);
             il.Emit(OpCodes.Ret);
+        }
+
+        private static SerializationException CreateSerializationException(object obj, Type objectType, Exception innerException)
+        {
+            return new SerializationException(obj, objectType, $"Unable to serialize type \"{objectType.FullName}\".", innerException);
+        }
+
+        private static ArraySerializationException CreateArraySerializationException(Array array, Type type, int index, Exception innerException)
+        {
+            return new ArraySerializationException(array, type, index, type.GetElementType(), $"Unable to serialize index {index} of type \"{type.GetElementType().FullName}\" of array \"{type.FullName}\".", innerException);
+        }
+
+        private static FieldSerializationException CreateFieldSerializationException(object obj, Type objectType, string fieldName, Type fieldType, Exception innerException)
+        {
+            return new FieldSerializationException(obj, objectType, fieldName, fieldType, $"Unable to serialize field \"{objectType.FullName}.{fieldName}\", type \"{fieldType.FullName}\".", innerException);
+        }
+
+        private static SerializationException CreateDeserializationException(object obj, Type objectType, Exception innerException)
+        {
+            return new SerializationException(obj, objectType, $"Unable to deserialize type \"{objectType.FullName}\".", innerException);
+        }
+
+        private static ArraySerializationException CreateArrayDeserializationException(Array array, Type type, int index, Exception innerException)
+        {
+            return new ArraySerializationException(array, type, index, type.GetElementType(), $"Unable to deserialize index {index} of type \"{type.GetElementType().FullName}\" of array \"{type.FullName}\".", innerException);
+        }
+
+        private static FieldSerializationException CreateFieldDeserializationException(object obj, Type objectType, string fieldName, Type fieldType, Exception innerException)
+        {
+            return new FieldSerializationException(obj, objectType, fieldName, fieldType, $"Unable to deserialize field \"{objectType.FullName}.{fieldName}\", type \"{fieldType.FullName}\".", innerException);
         }
 
         private delegate void SerializeObjectDelegate<T>(T obj, Stream stream, SerializedObjectsCollection serializedObjects);
