@@ -61,6 +61,7 @@
     <Compile Include="SerializationHelpersTests\SerializationEndOfStreamException.cs" />
     <Compile Include="SerializationHelpersTests\SerializationHelpersRoundTrip.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="TestStructures\Enums.cs" />
     <Compile Include="TestStructures\ExampleClass.cs" />
     <Compile Include="TestStructures\ExampleStruct.cs" />
     <Compile Include="TestStructures\StubStreamNonReadWrite.cs" />

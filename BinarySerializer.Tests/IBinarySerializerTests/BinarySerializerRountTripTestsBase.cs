@@ -175,6 +175,78 @@ namespace BinarySerializer.Tests.IBinarySerializerTests
             AssertRoundTrip(value);
         }
 
+        [DataTestMethod]
+        [DataRow(ByteEnum.A)]
+        [DataRow(ByteEnum.B)]
+        [DataRow(ByteEnum.C)]
+        public void ByteEnumRoundTrip(ByteEnum value)
+        {
+            AssertRoundTrip(value);
+        }
+
+        [DataTestMethod]
+        [DataRow(SByteEnum.A)]
+        [DataRow(SByteEnum.B)]
+        [DataRow(SByteEnum.C)]
+        public void SByteEnumRoundTrip(SByteEnum value)
+        {
+            AssertRoundTrip(value);
+        }
+
+        [DataTestMethod]
+        [DataRow(ShortEnum.A)]
+        [DataRow(ShortEnum.B)]
+        [DataRow(ShortEnum.C)]
+        public void ShortEnumRoundTrip(ShortEnum value)
+        {
+            AssertRoundTrip(value);
+        }
+
+        [DataTestMethod]
+        [DataRow(UShortEnum.A)]
+        [DataRow(UShortEnum.B)]
+        [DataRow(UShortEnum.C)]
+        public void UShortEnumRoundTrip(UShortEnum value)
+        {
+            AssertRoundTrip(value);
+        }
+
+        [DataTestMethod]
+        [DataRow(IntEnum.A)]
+        [DataRow(IntEnum.B)]
+        [DataRow(IntEnum.C)]
+        public void IntEnumRoundTrip(IntEnum value)
+        {
+            AssertRoundTrip(value);
+        }
+
+        [DataTestMethod]
+        [DataRow(UIntEnum.A)]
+        [DataRow(UIntEnum.B)]
+        [DataRow(UIntEnum.C)]
+        public void UIntEnumRoundTrip(UIntEnum value)
+        {
+            AssertRoundTrip(value);
+        }
+
+        [DataTestMethod]
+        [DataRow(LongEnum.A)]
+        [DataRow(LongEnum.B)]
+        [DataRow(LongEnum.C)]
+        public void LongEnumRoundTrip(LongEnum value)
+        {
+            AssertRoundTrip(value);
+        }
+
+        [DataTestMethod]
+        [DataRow(ULongEnum.A)]
+        [DataRow(ULongEnum.B)]
+        [DataRow(ULongEnum.C)]
+        public void ULongEnumRoundTrip(ULongEnum value)
+        {
+            AssertRoundTrip(value);
+        }
+
         [TestMethod]
         public void StructRoundTrip()
         {

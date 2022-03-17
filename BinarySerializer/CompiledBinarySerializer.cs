@@ -158,7 +158,7 @@ namespace BinarySerializer
             DynamicMethod method = new DynamicMethod("Serialize", typeof(void), new[] { type, typeof(Stream), typeof(SerializedObjectsCollection) }, typeof(CompiledBinarySerializer), true);
             _serializeMethodInfoCache[type] = method;
 
-            if (type.IsPrimitive) EmitPrimitiveSerialize(type, method);
+            if (type.IsPrimitive || type.IsEnum) EmitPrimitiveSerialize(type, method);
             else if (type.Equals(typeof(string))) EmitStringSerialize(method);
             else if (type.Equals(typeof(decimal))) EmitDecimalSerialize(method);
             else if (type.IsArray) EmitArraySerialize(type, method);
@@ -207,18 +207,22 @@ namespace BinarySerializer
         /// <exception cref="UnsupportedTypeException"></exception>
         private void EmitPrimitiveSerializeMethodCall(Type type, ILGenerator il)
         {
-            if (type.Equals(typeof(byte))) il.Emit(OpCodes.Call, _serializeByte);
-            else if (type.Equals(typeof(sbyte))) il.Emit(OpCodes.Call, _serializeSByte);
-            else if (type.Equals(typeof(bool))) il.Emit(OpCodes.Call, _serializeBoolean);
-            else if (type.Equals(typeof(short))) il.Emit(OpCodes.Call, _serializeShort);
-            else if (type.Equals(typeof(ushort))) il.Emit(OpCodes.Call, _serializeUShort);
-            else if (type.Equals(typeof(char))) il.Emit(OpCodes.Call, _serializeChar);
-            else if (type.Equals(typeof(int))) il.Emit(OpCodes.Call, _serializeInt);
-            else if (type.Equals(typeof(uint))) il.Emit(OpCodes.Call, _serializeUInt);
-            else if (type.Equals(typeof(float))) il.Emit(OpCodes.Call, _serializeFloat);
-            else if (type.Equals(typeof(long))) il.Emit(OpCodes.Call, _serializeLong);
-            else if (type.Equals(typeof(ulong))) il.Emit(OpCodes.Call, _serializeULong);
-            else if (type.Equals(typeof(double))) il.Emit(OpCodes.Call, _serializeDouble);
+            Type actualType;
+            if (type.IsEnum) actualType = type.GetEnumUnderlyingType();
+            else actualType = type;
+
+            if (actualType.Equals(typeof(byte))) il.Emit(OpCodes.Call, _serializeByte);
+            else if (actualType.Equals(typeof(sbyte))) il.Emit(OpCodes.Call, _serializeSByte);
+            else if (actualType.Equals(typeof(bool))) il.Emit(OpCodes.Call, _serializeBoolean);
+            else if (actualType.Equals(typeof(short))) il.Emit(OpCodes.Call, _serializeShort);
+            else if (actualType.Equals(typeof(ushort))) il.Emit(OpCodes.Call, _serializeUShort);
+            else if (actualType.Equals(typeof(char))) il.Emit(OpCodes.Call, _serializeChar);
+            else if (actualType.Equals(typeof(int))) il.Emit(OpCodes.Call, _serializeInt);
+            else if (actualType.Equals(typeof(uint))) il.Emit(OpCodes.Call, _serializeUInt);
+            else if (actualType.Equals(typeof(float))) il.Emit(OpCodes.Call, _serializeFloat);
+            else if (actualType.Equals(typeof(long))) il.Emit(OpCodes.Call, _serializeLong);
+            else if (actualType.Equals(typeof(ulong))) il.Emit(OpCodes.Call, _serializeULong);
+            else if (actualType.Equals(typeof(double))) il.Emit(OpCodes.Call, _serializeDouble);
             else throw new UnsupportedTypeException(type, $"Primitive type \"{type.FullName}\" not supported.");
         }
 
@@ -610,7 +614,7 @@ namespace BinarySerializer
             DynamicMethod method = new DynamicMethod("Deserialize", type, new[] { typeof(Stream), typeof(DeserializedObjectsCollection) }, typeof(CompiledBinarySerializer), true);
             _deserializeMethodInfoCache[type] = method;
 
-            if (type.IsPrimitive) EmitPrimitiveDeserialize(type, method);
+            if (type.IsPrimitive || type.IsEnum) EmitPrimitiveDeserialize(type, method);
             else if (type.Equals(typeof(string))) EmitStringDeserialize(method);
             else if (type.Equals(typeof(decimal))) EmitDecimalDeserialize(method);
             else if (type.IsArray) EmitArrayDeserialize(type, method);
@@ -659,18 +663,22 @@ namespace BinarySerializer
         /// <exception cref="UnsupportedTypeException"></exception>
         private void EmitPrimitiveDeserializeMethodCall(Type type, ILGenerator il)
         {
-            if (type.Equals(typeof(byte))) il.Emit(OpCodes.Call, _deserializeByte);
-            else if (type.Equals(typeof(sbyte))) il.Emit(OpCodes.Call, _deserializeSByte);
-            else if (type.Equals(typeof(bool))) il.Emit(OpCodes.Call, _deserializeBoolean);
-            else if (type.Equals(typeof(short))) il.Emit(OpCodes.Call, _deserializeShort);
-            else if (type.Equals(typeof(ushort))) il.Emit(OpCodes.Call, _deserializeUShort);
-            else if (type.Equals(typeof(char))) il.Emit(OpCodes.Call, _deserializeChar);
-            else if (type.Equals(typeof(int))) il.Emit(OpCodes.Call, _deserializeInt);
-            else if (type.Equals(typeof(uint))) il.Emit(OpCodes.Call, _deserializeUInt);
-            else if (type.Equals(typeof(float))) il.Emit(OpCodes.Call, _deserializeFloat);
-            else if (type.Equals(typeof(long))) il.Emit(OpCodes.Call, _deserializeLong);
-            else if (type.Equals(typeof(ulong))) il.Emit(OpCodes.Call, _deserializeULong);
-            else if (type.Equals(typeof(double))) il.Emit(OpCodes.Call, _deserializeDouble);
+            Type actualType;
+            if (type.IsEnum) actualType = type.GetEnumUnderlyingType();
+            else actualType = type;
+
+            if (actualType.Equals(typeof(byte))) il.Emit(OpCodes.Call, _deserializeByte);
+            else if (actualType.Equals(typeof(sbyte))) il.Emit(OpCodes.Call, _deserializeSByte);
+            else if (actualType.Equals(typeof(bool))) il.Emit(OpCodes.Call, _deserializeBoolean);
+            else if (actualType.Equals(typeof(short))) il.Emit(OpCodes.Call, _deserializeShort);
+            else if (actualType.Equals(typeof(ushort))) il.Emit(OpCodes.Call, _deserializeUShort);
+            else if (actualType.Equals(typeof(char))) il.Emit(OpCodes.Call, _deserializeChar);
+            else if (actualType.Equals(typeof(int))) il.Emit(OpCodes.Call, _deserializeInt);
+            else if (actualType.Equals(typeof(uint))) il.Emit(OpCodes.Call, _deserializeUInt);
+            else if (actualType.Equals(typeof(float))) il.Emit(OpCodes.Call, _deserializeFloat);
+            else if (actualType.Equals(typeof(long))) il.Emit(OpCodes.Call, _deserializeLong);
+            else if (actualType.Equals(typeof(ulong))) il.Emit(OpCodes.Call, _deserializeULong);
+            else if (actualType.Equals(typeof(double))) il.Emit(OpCodes.Call, _deserializeDouble);
             else throw new UnsupportedTypeException(type, $"Primitive type \"{type.FullName}\" not supported.");
         }
 
