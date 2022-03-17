@@ -1,6 +1,6 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace BinarySerializer.Tests.IBinarySerializerTests.ReflectionBinarySerializerTests
+namespace BinarySerializer.Tests.IBinarySerializerTests.CompiledBinarySerializerTests
 {
     [TestClass]
     public class CompiledBinarySerializer : BinarySerializerTestsBase

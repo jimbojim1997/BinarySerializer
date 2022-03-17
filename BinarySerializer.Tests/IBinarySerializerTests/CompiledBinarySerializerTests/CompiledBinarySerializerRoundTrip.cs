@@ -3,7 +3,7 @@
 using System;
 using System.IO;
 
-namespace BinarySerializer.Tests.IBinarySerializerTests.ReflectionBinarySerializerTests
+namespace BinarySerializer.Tests.IBinarySerializerTests.CompiledBinarySerializerTests
 {
     [TestClass]
     public class CompiledBinarySerializerRoundTrip : BinarySerializerRountTripTestsBase
