@@ -7,7 +7,7 @@ using System.Runtime.Serialization;
 
 namespace BinarySerializer
 {
-    public class CompiledBinarySerializer : IBinarySerializer
+    public class CompiledBinarySerializer : ICompiledBinarySerializer
     {
         #region Statics
         private static readonly MethodInfo _serializeByte = typeof(SerializationHelpers).GetMethod(nameof(SerializationHelpers.SerializeByte), BindingFlags.Static | BindingFlags.NonPublic);
